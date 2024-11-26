@@ -1,0 +1,77 @@
+import pandas as pd
+import numpy as np
+
+# Load dataset
+df = pd.read_csv('titanic.csv') # Replace with your dataset path
+
+print("First few rows:")
+print(df.head())
+
+# Identify missing values
+print("\nMissing values in each column:")
+print(df.isnull().sum())
+
+# Handle missing values
+
+# Fill numerical columns with the mean
+numerical_cols = df.select_dtypes(include=[np.number]).columns
+df[numerical_cols] = df[numerical_cols].fillna(df[numerical_cols].mean())
+
+# Fill categorical columns with the mode
+categorical_cols = df.select_dtypes(include=['object']).columns
+df[categorical_cols] = df[categorical_cols].fillna(df[categorical_cols].mode().iloc[0])
+
+# Drop columns with excessive missing values
+# threshold = 0.5  # Drop if more than 50% of values are missing
+df = df.dropna(axis=1, thresh=int(threshold * len(df)))
+
+print("\nData after handling missing values:")
+print(df.head())
+
+##Encoding catogrical  value##
+
+from sklearn.preprocessing import LabelEncoder
+import pandas as pd
+
+# Identify categorical columns
+categorical_cols = df.select_dtypes(include=['object']).columns
+print("\nCategorical columns:", categorical_cols)
+
+# Example: Label Encoding for the 'Sex' column (if available)
+if 'Sex' in df.columns:
+    label_encoder = LabelEncoder()
+    df['Sex'] = label_encoder.fit_transform(df['Sex'])
+    print("\nLabel Encoded 'Sex' column:")
+    print(df['Sex'].head())
+
+# Example: One-Hot Encoding for 'Cabin' or any suitable column
+if 'Cabin' in df.columns:
+    df['Cabin'] = df['Cabin'].fillna('Unknown')  # Handle missing values first
+    df = pd.get_dummies(df, columns=['Cabin'], drop_first=True)
+    print("\nOne-Hot Encoded 'Cabin' column:")
+    print(df.head())
+
+##Creating new feature##
+# Example: Creating new features
+df['FamilySize'] = df['SibSp'] + df['Parch'] + 1  # Include the individual
+df['IsAlone'] = (df['FamilySize'] == 1).astype(int)
+
+print("\nData with new features:")
+print(df[['SibSp', 'Parch', 'FamilySize', 'IsAlone']].head())
+
+##Feature Scaling##
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+# Identify numerical features
+numerical_cols = df.select_dtypes(include=[np.number]).columns
+
+# Standardization
+scaler = StandardScaler()
+df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+
+# Normalization (optional alternative)
+# normalizer = MinMaxScaler()
+# df[numerical_cols] = normalizer.fit_transform(df[numerical_cols])
+
+print("\nData after scaling:")
+print(df[numerical_cols].head())
